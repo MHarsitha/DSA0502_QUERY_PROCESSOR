@@ -1,0 +1,54 @@
+# Install required library
+!pip install lxml
+
+import pandas as pd
+
+# Load datasets
+orders = pd.read_csv("Orders.csv")
+customers = pd.read_csv("Customers.csv")
+orders_json = pd.read_json("Orders.json")
+orders_xml = pd.read_xml("Orders.xml")
+
+# Inspect datasets
+print("Orders Dataset")
+print(orders.head())
+
+print("\nCustomers Dataset")
+print(customers.head())
+
+# Remove duplicate records
+orders = orders.drop_duplicates()
+customers = customers.drop_duplicates()
+
+# Handle missing values
+orders = orders.dropna()
+customers = customers.dropna()
+
+# Validate data types
+orders["CustomerID"] = orders["CustomerID"].astype(int)
+customers["CustomerID"] = customers["CustomerID"].astype(int)
+
+# Merge datasets
+data = pd.merge(orders, customers, on="CustomerID")
+
+# Summary statistics
+print("\nSummary Statistics")
+print(data.describe(include="all"))
+
+# Category-wise Total Sales
+category_sales = data.groupby("Category")["Amount"].sum()
+
+# Highest value category
+highest_category = category_sales.idxmax()
+highest_value = category_sales.max()
+
+print("\nCategory-wise Sales")
+print(category_sales)
+
+print("\nHighest Value Category")
+print(highest_category, "-", highest_value)
+
+# Export cleaned dataset
+data.to_csv("Cleaned_Online_Orders.csv", index=False)
+
+print("\nCleaned dataset exported successfully.")
