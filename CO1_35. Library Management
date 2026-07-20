@@ -1,0 +1,65 @@
+# Install required libraries (run once)
+!pip install pandas lxml openpyxl
+
+# Import libraries
+import pandas as pd
+from google.colab import drive
+
+# Mount Google Drive
+drive.mount('/content/drive')
+
+# Path to your folder in Google Drive
+# The sample files were created in the current working directory ('/content/')
+path = ""      # Changed to an empty string to reference files in the current working directory
+
+# Load datasets
+books = pd.read_csv(path + "Books.csv")
+authors = pd.read_csv(path + "Authors.csv")
+books_json = pd.read_json(path + "Books.json")
+books_xml = pd.read_xml(path + "Books.xml")
+
+# Inspect datasets
+print("Books Dataset")
+print(books.head())
+
+print("\nAuthors Dataset")
+print(authors.head())
+
+# Remove duplicate records
+books = books.drop_duplicates()
+authors = authors.drop_duplicates()
+
+# Handle missing values
+books = books.dropna()
+authors = authors.dropna()
+
+# Validate data types
+books["AuthorID"] = books["AuthorID"].astype(int)
+authors["AuthorID"] = authors["AuthorID"].astype(int)
+
+# Merge datasets using AuthorID
+data = pd.merge(books, authors, on="AuthorID")
+
+# Summary statistics
+print("\nSummary Statistics")
+print(data.describe(include="all"))
+
+# Category-wise Book Count
+category_count = data.groupby("Category")["BookID"].count()
+
+# Category with highest number of books
+highest_category = category_count.idxmax()
+highest_value = category_count.max()
+
+print("\nCategory-wise Book Count")
+print(category_count)
+
+print("\nCategory with Highest Number of Books:")
+print(highest_category, "-", highest_value)
+
+# Export cleaned dataset
+output_file = path + "Cleaned_Library_Data.csv"
+data.to_csv(output_file, index=False)
+
+print("\nCleaned dataset exported successfully.")
+print("Saved at:", output_file)
